@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Cálculo Tiempo Transcurrido</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    background: #f2f2f2;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    margin: 0;
+  }
+
+  .card {
+    background: #fff;
+    border: 3px solid #000;
+    border-radius: 30px;
+    padding: 40px 50px;
+    width: 480px;
+    box-shadow: 4px 4px 0px rgba(0,0,0,0.2);
+  }
+
+  h1 {
+    font-size: 22px;
+    letter-spacing: 1px;
+    margin-bottom: 30px;
+  }
+
+  h2 {
+    font-size: 18px;
+    margin-bottom: 15px;
+  }
+
+  .fila {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 25px;
+  }
+
+  .campo {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .campo label {
+    font-weight: bold;
+    font-size: 14px;
+  }
+
+  input[type="number"] {
+    width: 60px;
+    height: 35px;
+    text-align: center;
+    font-size: 16px;
+    border: 2px solid #000;
+    border-radius: 4px;
+  }
+
+  /* Ocultar flechas del input number */
+  input[type=number]::-webkit-inner-spin-button, 
+  input[type=number]::-webkit-outer-spin-button { 
+    -webkit-appearance: none; 
+    margin: 0; 
+  }
+
+  button {
+    display: block;
+    margin: 20px auto 30px auto;
+    padding: 12px 40px;
+    font-size: 16px;
+    font-weight: bold;
+    border: 2px solid #000;
+    border-radius: 30px;
+    background: #fff;
+    cursor: pointer;
+    transition: 0.2s;
+  }
+
+  button:hover {
+    background: #000;
+    color: #fff;
+  }
+
+  input[readonly] {
+    background: #eaeaea;
+  }
+
+  .error {
+    color: #c0392b;
+    font-size: 13px;
+    margin-top: -15px;
+    margin-bottom: 15px;
+    display: none;
+  }
+</style>
+</head>
+<body>
+
+<div class="card">
+  <h1>CÁLCULO TIEMPO TRANSCURRIDO</h1>
+
+  <h2>Hora Inicial</h2>
+  <div class="fila">
+    <div class="campo">
+      <label>Hora</label>
+      <input type="number" id="hIniH" min="0" max="23" value="0">
+    </div>
+    <div class="campo">
+      <label>Minutos</label>
+      <input type="number" id="hIniM" min="0" max="59" value="0">
+    </div>
+    <div class="campo">
+      <label>Segundos</label>
+      <input type="number" id="hIniS" min="0" max="59" value="0">
+    </div>
+  </div>
+
+  <h2>Hora Final</h2>
+  <div class="fila">
+    <div class="campo">
+      <label>Hora</label>
+      <input type="number" id="hFinH" min="0" max="23" value="0">
+    </div>
+    <div class="campo">
+      <label>Minutos</label>
+      <input type="number" id="hFinM" min="0" max="59" value="0">
+    </div>
+    <div class="campo">
+      <label>Segundos</label>
+      <input type="number" id="hFinS" min="0" max="59" value="0">
+    </div>
+  </div>
+
+  <div class="error" id="mensajeError">Por favor ingresa valores válidos (0-23 horas, 0-59 min/seg).</div>
+
+  <button onclick="procesar()">PROCESAR</button>
+
+  <h2>Resultado</h2>
+  <div class="fila">
+    <div class="campo">
+      <label>Hora</label>
+      <input type="number" id="resH" readonly>
+    </div>
+    <div class="campo">
+      <label>Minutos</label>
+      <input type="number" id="resM" readonly>
+    </div>
+    <div class="campo">
+      <label>Segundos</label>
+      <input type="number" id="resS" readonly>
+    </div>
+  </div>
+</div>
+
+<script>
+function procesar() {
+  const hIniH = parseInt(document.getElementById('hIniH').value) || 0;
+  const hIniM = parseInt(document.getElementById('hIniM').value) || 0;
+  const hIniS = parseInt(document.getElementById('hIniS').value) || 0;
+
+  const hFinH = parseInt(document.getElementById('hFinH').value) || 0;
+  const hFinM = parseInt(document.getElementById('hFinM').value) || 0;
+  const hFinS = parseInt(document.getElementById('hFinS').value) || 0;
+
+  const errorMsg = document.getElementById('mensajeError');
+
+  // Validación básica de rangos
+  const valores = [hIniH, hFinH];
+  const minutosSegundos = [hIniM, hIniS, hFinM, hFinS];
+
+  const horasValidas = valores.every(v => v >= 0 && v <= 23);
+  const minSegValidos = minutosSegundos.every(v => v >= 0 && v <= 59);
+
+  if (!horasValidas || !minSegValidos) {
+    errorMsg.style.display = 'block';
+    return;
+  } else {
+    errorMsg.style.display = 'none';
+  }
+
+  // Convertir todo a segundos totales
+  let segInicial = hIniH * 3600 + hIniM * 60 + hIniS;
+  let segFinal = hFinH * 3600 + hFinM * 60 + hFinS;
+
+  let diferencia = segFinal - segInicial;
+
+  // Si la hora final es menor (cruzó medianoche), sumamos un día completo
+  if (diferencia < 0) {
+    diferencia += 24 * 3600;
+  }
+
+  const horasRes = Math.floor(diferencia / 3600);
+  const minutosRes = Math.floor((diferencia % 3600) / 60);
+  const segundosRes = diferencia % 60;
+
+  document.getElementById('resH').value = horasRes;
+  document.getElementById('resM').value = minutosRes;
+  document.getElementById('resS').value = segundosRes;
+}
+</script>
+
+</body>
+</html>
